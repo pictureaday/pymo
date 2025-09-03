@@ -33,8 +33,9 @@ def print_label(text):
     printer="DYMO LabelWriter 450 Turbo"
     media="media=oe_square-multipurpose-label_1x1in"
     
-    subprocess.run(["convert", "-size", "150x150", "xc:white", "-pointsize", "60", "-fill", "black", "-gravity", "Center", "-annotate", "0", text, fname])
-    subprocess.run(["lprint", "submit", "-d", printer, "-o", media, fname ])
+    subprocess.run(["convert", "-size", "150x150", "xc:white", "-pointsize", "30", "-fill", "black", "-gravity", "Center", "-annotate", "0", text, fname])
+    #subprocess.run(["lprint", "submit", "-d", printer, "-o", media, fname ])
+    subprocess.run(["lp", "-o page-bottom=4", "-o page-top=4", "-o media=Custom.1x1in", fname ])
 
 # Callback for button 1
 def button1_callback(channel):
