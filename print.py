@@ -1,4 +1,5 @@
 import RPi.GPIO as GPIO
+import os
 import time
 import queue
 import datetime
@@ -8,11 +9,25 @@ import subprocess
 GPIO.setmode(GPIO.BCM)
 
 # Pin setup
-BUTTON1_PIN = 20  # First button → previous date
-BUTTON2_PIN = 21  # Second button → today's date
+
+BUTTON1_PIN = 20
+BUTTON2_PIN = 1
+BUTTON3_PIN = 16
+BUTTON4_PIN = 12
+BUTTON5_PIN = 21
+BUTTON6_PIN = 8
+BUTTON7_PIN = 7
+BUTTON8_PIN = 25
 
 GPIO.setup(BUTTON1_PIN, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 GPIO.setup(BUTTON2_PIN, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+GPIO.setup(BUTTON3_PIN, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+GPIO.setup(BUTTON4_PIN, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+
+GPIO.setup(BUTTON5_PIN, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+GPIO.setup(BUTTON6_PIN, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+GPIO.setup(BUTTON7_PIN, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+GPIO.setup(BUTTON8_PIN, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 
 # Queue for button press events (stores callables)
 button_queue = queue.Queue()
@@ -23,10 +38,32 @@ def print_prev_date():
     print(prev_date)
     print_label(prev_date)
 
+def print_today_date_breastmilk():
+    today = datetime.date.today().strftime("%m/%d/%y")
+    print(today)
+    print_label("Breastmilk\n" + today)
+
 def print_today_date():
     today = datetime.date.today().strftime("%m/%d/%y")
     print(today)
     print_label(today)
+
+# Plain names
+def print_name_kid1():
+    print_file_contents("kid1.txt");
+def print_name_kid2():
+    print_file_contents("kid2.txt");
+
+def print_file_contents(fname):
+    if os.path.isfile(fname) and os.access(fname, os.R_OK):
+        file_object = open(fname)
+        print_label(file_object.read())
+    else:
+        with open(fname, 'w') as file:
+            file.write("Sample\nName")
+        print(fname + " does not exist. Creating it now.")
+
+        
 
 def print_label(text):
     fname="label.png"
@@ -42,14 +79,33 @@ def button1_callback(channel):
     if GPIO.input(BUTTON1_PIN) == GPIO.HIGH:
         button_queue.put(print_prev_date)
 
-# Callback for button 2
-def button2_callback(channel):
-    if GPIO.input(BUTTON2_PIN) == GPIO.HIGH:
+# Callback for button 4
+def button4_callback(channel):
+    if GPIO.input(BUTTON4_PIN) == GPIO.HIGH:
+        button_queue.put(print_name_kid1)
+
+# Callback for button 5
+def button5_callback(channel):
+    if GPIO.input(BUTTON5_PIN) == GPIO.HIGH:
         button_queue.put(print_today_date)
+
+# Callback for button 6
+def button6_callback(channel):
+    if GPIO.input(BUTTON6_PIN) == GPIO.HIGH:
+        button_queue.put(print_today_date_breastmilk)
+
+# Callback for button 8
+def button8_callback(channel):
+    if GPIO.input(BUTTON8_PIN) == GPIO.HIGH:
+        button_queue.put(print_name_kid2)
+
 
 # Event detection
 GPIO.add_event_detect(BUTTON1_PIN, GPIO.RISING, callback=button1_callback, bouncetime=50)
-GPIO.add_event_detect(BUTTON2_PIN, GPIO.RISING, callback=button2_callback, bouncetime=50)
+GPIO.add_event_detect(BUTTON4_PIN, GPIO.RISING, callback=button4_callback, bouncetime=50)
+GPIO.add_event_detect(BUTTON5_PIN, GPIO.RISING, callback=button5_callback, bouncetime=50)
+GPIO.add_event_detect(BUTTON6_PIN, GPIO.RISING, callback=button6_callback, bouncetime=50)
+GPIO.add_event_detect(BUTTON8_PIN, GPIO.RISING, callback=button8_callback, bouncetime=50)
 
 print("Press button 1 for previous date, button 2 for today's date (CTRL+C to exit)")
 
@@ -64,3 +120,4 @@ except KeyboardInterrupt:
     print("\nExiting...")
 finally:
     GPIO.cleanup()
+
