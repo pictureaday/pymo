@@ -38,6 +38,11 @@ def print_prev_date():
     print(prev_date)
     print_label(prev_date)
 
+def print_today_date_schoolmilk():
+    today = datetime.date.today().strftime("%m/%d/%y")
+    print(today)
+    print_label("School\nMilk\n" + today)
+
 def print_today_date_breastmilk():
     today = datetime.date.today().strftime("%m/%d/%y")
     print(today)
@@ -49,15 +54,19 @@ def print_today_date():
     print_label(today)
 
 # Plain names
+def print_name_adult1():
+    print_file_contents("adult1.txt", "24");
+def print_name_adult2():
+    print_file_contents("adult2.txt", "24");
 def print_name_kid1():
     print_file_contents("kid1.txt");
-def print_name_kid2():
-    print_file_contents("kid2.txt");
+def print_name_kid1():
+    print_file_contents("kid1.txt");
 
-def print_file_contents(fname):
+def print_file_contents(fname, fontsize="30"):
     if os.path.isfile(fname) and os.access(fname, os.R_OK):
         file_object = open(fname)
-        print_label(file_object.read())
+        print_label(file_object.read(), fontsize)
     else:
         with open(fname, 'w') as file:
             file.write("Sample\nName")
@@ -65,19 +74,25 @@ def print_file_contents(fname):
 
         
 
-def print_label(text):
+def print_label(text, fontsize="30"):
     fname="label.png"
-    printer="DYMO LabelWriter 450 Turbo"
-    media="media=oe_square-multipurpose-label_1x1in"
-    
-    subprocess.run(["convert", "-size", "150x150", "xc:white", "-pointsize", "30", "-fill", "black", "-gravity", "Center", "-annotate", "0", text, fname])
-    #subprocess.run(["lprint", "submit", "-d", printer, "-o", media, fname ])
+    print("fontsize: " + fontsize) 
+    subprocess.run(["convert", "-size", "150x150", "xc:white", "-pointsize", fontsize, "-fill", "black", "-gravity", "Center", "-annotate", "0", text, fname])
     subprocess.run(["lp", "-o page-bottom=4", "-o page-top=4", "-o media=Custom.1x1in", fname ])
 
 # Callback for button 1
 def button1_callback(channel):
     if GPIO.input(BUTTON1_PIN) == GPIO.HIGH:
         button_queue.put(print_prev_date)
+# Callback for button 2
+def button2_callback(channel):
+    if GPIO.input(BUTTON2_PIN) == GPIO.HIGH:
+        button_queue.put(print_today_date_schoolmilk)
+# Callback for button 3
+
+def button3_callback(channel):
+    if GPIO.input(BUTTON3_PIN) == GPIO.HIGH:
+        button_queue.put(print_name_adult1)
 
 # Callback for button 4
 def button4_callback(channel):
@@ -94,6 +109,11 @@ def button6_callback(channel):
     if GPIO.input(BUTTON6_PIN) == GPIO.HIGH:
         button_queue.put(print_today_date_breastmilk)
 
+# Callback for button 7
+def button7_callback(channel):
+    if GPIO.input(BUTTON7_PIN) == GPIO.HIGH:
+        button_queue.put(print_name_adult2)
+
 # Callback for button 8
 def button8_callback(channel):
     if GPIO.input(BUTTON8_PIN) == GPIO.HIGH:
@@ -102,9 +122,12 @@ def button8_callback(channel):
 
 # Event detection
 GPIO.add_event_detect(BUTTON1_PIN, GPIO.RISING, callback=button1_callback, bouncetime=50)
+GPIO.add_event_detect(BUTTON2_PIN, GPIO.RISING, callback=button2_callback, bouncetime=50)
+GPIO.add_event_detect(BUTTON3_PIN, GPIO.RISING, callback=button3_callback, bouncetime=50)
 GPIO.add_event_detect(BUTTON4_PIN, GPIO.RISING, callback=button4_callback, bouncetime=50)
 GPIO.add_event_detect(BUTTON5_PIN, GPIO.RISING, callback=button5_callback, bouncetime=50)
 GPIO.add_event_detect(BUTTON6_PIN, GPIO.RISING, callback=button6_callback, bouncetime=50)
+GPIO.add_event_detect(BUTTON7_PIN, GPIO.RISING, callback=button7_callback, bouncetime=50)
 GPIO.add_event_detect(BUTTON8_PIN, GPIO.RISING, callback=button8_callback, bouncetime=50)
 
 print("Press button 1 for previous date, button 2 for today's date (CTRL+C to exit)")
